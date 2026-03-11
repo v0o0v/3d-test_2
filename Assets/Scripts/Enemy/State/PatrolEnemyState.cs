@@ -13,7 +13,15 @@ public class PatrolEnemyState: EnemyState, ICharacterState
 
     public void Update()
     {
-        if (!_navMeshAgent.pathPending && _navMeshAgent.remainingDistance <= _navMeshAgent.stoppingDistance){
+        var detectionTargetTransform = _enemyController.DetectionTargetInCircle();
+
+        //chase 체크
+        if (detectionTargetTransform){
+            _navMeshAgent.SetDestination((detectionTargetTransform.position));
+            _enemyController.SetState(EnemyController.EEnemyState.Chase);
+        }
+        
+        else if (!_navMeshAgent.pathPending && _navMeshAgent.remainingDistance <= _navMeshAgent.stoppingDistance){
             _enemyController.SetState((EnemyController.EEnemyState.Idle));
         }
         

@@ -9,5 +9,12 @@ public class ChomperEnemyController : EnemyController {
     public void Grunt(){
         
     }
-
+    
+    public void AttackBegin(){
+        
+    }
+    
+    public void AttackEnd(){
+        
+    }
 }

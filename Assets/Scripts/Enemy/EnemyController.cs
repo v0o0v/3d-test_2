@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Enemy.State;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -50,15 +51,16 @@ public class EnemyController : MonoBehaviour {
     private void Awake(){
         _animator = GetComponent<Animator>();
         _navMeshAgent = GetComponent<NavMeshAgent>();
-
-        var idleEnemyState = new IdleEnemyState(this, _animator, _navMeshAgent);
-        var patrolEnemyState = new PatrolEnemyState(this, _animator, _navMeshAgent);
-        var chaseEnemyState = new ChaseEnemyState(this, _animator, _navMeshAgent);
+        
+        // NavMesh Agent 설정
+        _navMeshAgent.updatePosition = false;
+        _navMeshAgent.updateRotation = true;
 
         _states = new Dictionary<EEnemyState, ICharacterState>{
-            { EEnemyState.Idle, idleEnemyState },
-            { EEnemyState.Patrol, patrolEnemyState },
-            { EEnemyState.Chase, chaseEnemyState },
+            { EEnemyState.Idle, new IdleEnemyState(this, _animator, _navMeshAgent) },
+            { EEnemyState.Patrol, new PatrolEnemyState(this, _animator, _navMeshAgent) },
+            { EEnemyState.Chase, new ChaseEnemyState(this, _animator, _navMeshAgent) },
+            { EEnemyState.Attack, new AttackEnemyState(this, _animator, _navMeshAgent)},
         };
         SetState(EEnemyState.Idle);
 
