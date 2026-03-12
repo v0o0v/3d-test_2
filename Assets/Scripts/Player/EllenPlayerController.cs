@@ -22,7 +22,7 @@ public class EllenPlayerController : PlayerController , IWeaponObserver<GameObje
     }
 
     public void OnNext(GameObject value){
-        Debug.Log("Staff hit");
+        value.GetComponent<EnemyController>()?.SetHit(10, transform.forward);
     }
     public void OnComplete(){
         _meleeWeaponController.Unsubscribe(this);

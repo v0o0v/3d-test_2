@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Enemy.State;
 using UnityEngine;
@@ -43,6 +44,7 @@ public class EnemyController : MonoBehaviour {
     public static readonly int EnemyAniParamHit = Animator.StringToHash("hit");
     public static readonly int EnemyAniParamDead = Animator.StringToHash("dead");
     public static readonly int EnemyAniParamMoveSpeed = Animator.StringToHash("move_speed");
+    
 
     //추적 대상
     private Transform _targetTransform;
@@ -61,6 +63,7 @@ public class EnemyController : MonoBehaviour {
             { EEnemyState.Patrol, new PatrolEnemyState(this, _animator, _navMeshAgent) },
             { EEnemyState.Chase, new ChaseEnemyState(this, _animator, _navMeshAgent) },
             { EEnemyState.Attack, new AttackEnemyState(this, _animator, _navMeshAgent)},
+            { EEnemyState.Hit, new HitEnemyState(this, _animator, _navMeshAgent)},
         };
         SetState(EEnemyState.Idle);
 
@@ -112,6 +115,31 @@ public class EnemyController : MonoBehaviour {
             }
         }
         return _targetTransform;
+    }
+
+    public void SetHit(int damage, Vector3 attackDirection){
+        SetState(EEnemyState.Hit);
+        StartCoroutine(Knockback(attackDirection));
+    }
+
+    private IEnumerator Knockback(Vector3 direction){
+        var kDir = direction;
+        float kDistance = 1f;
+        float kDuration = 0.2f;
+        float elapse = 0f;
+        
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = startPos + kDir * kDistance;
+        targetPos.y = transform.position.y;
+
+        while (elapse < kDuration){
+            Vector3 lerpPos = Vector3.Lerp(startPos, targetPos, elapse / kDuration);
+            lerpPos.y = startPos.y;
+            transform.position = lerpPos;
+            elapse += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = targetPos;
     }
 
     private void OnDrawGizmos(){

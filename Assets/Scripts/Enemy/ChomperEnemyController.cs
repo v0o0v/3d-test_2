@@ -11,7 +11,6 @@ public class ChomperEnemyController : EnemyController, IWeaponObserver<GameObjec
     }
 
     public void OnNext(GameObject value){
-        Debug.Log("Chomper Attack");
         value.GetComponent<PlayerController>()?.SetHit(10, -transform.forward);
     }
 
