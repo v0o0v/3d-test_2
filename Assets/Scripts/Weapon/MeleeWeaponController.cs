@@ -35,7 +35,7 @@ public class MeleeWeaponController : MonoBehaviour, IWeaponObservable<GameObject
             var worldPosition = GetTriggerWorldPosition(_previousTriggerPositions[i]);
             var direction = worldPosition - _previousTriggerPositions[i];
             Ray ray = new Ray(worldPosition, direction);
-            RaycastHit[] hits = new RaycastHit[10];
+            RaycastHit[] hits = new RaycastHit[1];
             var hitCount = Physics.SphereCastNonAlloc(ray, triggerZones[i].radius, hits, direction.magnitude,
                 targetLayerMask);
             for (int j = 0; j < hitCount; j++){
