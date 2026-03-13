@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 5773353986069805738}
   - component: {fileID: 2193186766162571404}
   - component: {fileID: 3871235290446562527}
+  - component: {fileID: 7921250050206005475}
+  - component: {fileID: 7617252322444060363}
   m_Layer: 9
   m_Name: Chomper
   m_TagString: Untagged
@@ -79,6 +81,9 @@ MonoBehaviour:
     m_Bits: 256
   detectionSightAngle: 30
   minimumRunDistance: 1
+  enemyStatus:
+    maxHp: 50
+    hp: 50
 --- !u!195 &2193186766162571404
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -119,6 +124,40 @@ MonoBehaviour:
   targetLayerMask:
     serializedVersion: 2
     m_Bits: 256
+--- !u!65 &7921250050206005475
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 36531138548285593}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!114 &7617252322444060363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 36531138548285593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05db7547f4274413be7759107aa04680, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HPBarController
+  hpBarPrefab: {fileID: 7642872595515259519, guid: f3b0ebcc78194a14e8355ce33d4dc8ea, type: 3}
 --- !u!1 &392234490014042342
 GameObject:
   m_ObjectHideFlags: 0

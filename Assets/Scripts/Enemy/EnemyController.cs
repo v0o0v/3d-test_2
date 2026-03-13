@@ -1,8 +1,17 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Enemy.State;
 using UnityEngine;
 using UnityEngine.AI;
+
+[Serializable]
+public struct EnemyStatus {
+
+    public int maxHp;
+    public int hp;
+
+}
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(NavMeshAgent))]
@@ -15,6 +24,7 @@ public class EnemyController : MonoBehaviour {
     [SerializeField] private LayerMask detectionTargetLayerMask; // 추적 대상 레이어마스크
     [SerializeField] private float detectionSightAngle = 30f; // 디텍션 시야 반각(전체 보는 각은 결국 60도로 계산해야함)
     [SerializeField] private float minimumRunDistance = 5f;
+    [Header("Status")] [SerializeField] private EnemyStatus enemyStatus;
 
     public float PatrolDetectionDistance => patrolDetectionDistance;
     public float PatrolWaitTime => patrolWaitTime;
@@ -24,6 +34,7 @@ public class EnemyController : MonoBehaviour {
 
     private Animator _animator;
     private NavMeshAgent _navMeshAgent;
+    private HPBarController _hpBarController;
 
     // 상태
     public enum EEnemyState {
@@ -44,7 +55,6 @@ public class EnemyController : MonoBehaviour {
     public static readonly int EnemyAniParamHit = Animator.StringToHash("hit");
     public static readonly int EnemyAniParamDead = Animator.StringToHash("dead");
     public static readonly int EnemyAniParamMoveSpeed = Animator.StringToHash("move_speed");
-    
 
     //추적 대상
     private Transform _targetTransform;
@@ -53,7 +63,7 @@ public class EnemyController : MonoBehaviour {
     private void Awake(){
         _animator = GetComponent<Animator>();
         _navMeshAgent = GetComponent<NavMeshAgent>();
-        
+
         // NavMesh Agent 설정
         _navMeshAgent.updatePosition = false;
         _navMeshAgent.updateRotation = true;
@@ -62,12 +72,14 @@ public class EnemyController : MonoBehaviour {
             { EEnemyState.Idle, new IdleEnemyState(this, _animator, _navMeshAgent) },
             { EEnemyState.Patrol, new PatrolEnemyState(this, _animator, _navMeshAgent) },
             { EEnemyState.Chase, new ChaseEnemyState(this, _animator, _navMeshAgent) },
-            { EEnemyState.Attack, new AttackEnemyState(this, _animator, _navMeshAgent)},
-            { EEnemyState.Hit, new HitEnemyState(this, _animator, _navMeshAgent)},
+            { EEnemyState.Attack, new AttackEnemyState(this, _animator, _navMeshAgent) },
+            { EEnemyState.Hit, new HitEnemyState(this, _animator, _navMeshAgent) },
+            { EEnemyState.Dead, new DeadEnemyState(this, _animator, _navMeshAgent) },
         };
         SetState(EEnemyState.Idle);
 
         _targetTransform = null;
+        _hpBarController = GetComponent<HPBarController>();
     }
 
     private void Update(){
@@ -114,12 +126,21 @@ public class EnemyController : MonoBehaviour {
                 _detectionResults[0] = null;
             }
         }
+
         return _targetTransform;
     }
 
     public void SetHit(int damage, Vector3 attackDirection){
-        SetState(EEnemyState.Hit);
-        StartCoroutine(Knockback(attackDirection));
+        enemyStatus.hp -= damage;
+        _hpBarController.SetHp((float)enemyStatus.hp / enemyStatus.maxHp);
+
+        if (enemyStatus.hp <= 0){
+            SetState(EEnemyState.Dead);
+        }
+        else{
+            SetState(EEnemyState.Hit);
+            StartCoroutine(Knockback(attackDirection));
+        }
     }
 
     private IEnumerator Knockback(Vector3 direction){
@@ -127,7 +148,7 @@ public class EnemyController : MonoBehaviour {
         float kDistance = 1f;
         float kDuration = 0.2f;
         float elapse = 0f;
-        
+
         Vector3 startPos = transform.position;
         Vector3 targetPos = startPos + kDir * kDistance;
         targetPos.y = transform.position.y;
@@ -139,11 +160,11 @@ public class EnemyController : MonoBehaviour {
             elapse += Time.deltaTime;
             yield return null;
         }
+
         transform.position = targetPos;
     }
 
     private void OnDrawGizmos(){
-        
         // 감지 범위
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, patrolDetectionDistance);
@@ -155,7 +176,7 @@ public class EnemyController : MonoBehaviour {
         Gizmos.DrawRay(transform.position, rightDirection * patrolDetectionDistance);
         Gizmos.DrawRay(transform.position, leftDirection * patrolDetectionDistance);
         Gizmos.DrawRay(transform.position, transform.forward * patrolDetectionDistance);
-        
+
         // Agent 목적지
         if (_navMeshAgent && _navMeshAgent.hasPath){
             Gizmos.color = Color.green;

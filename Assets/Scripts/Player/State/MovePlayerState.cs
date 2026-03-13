@@ -18,6 +18,7 @@ public class MovePlayerState : PlayerState, ICharacterState
         
         // 액션 할당
         _playerInput.actions["Jump"].performed += Jump;
+        _playerInput.actions["Fire"].performed += Attack;
     }
 
     public void Update()
@@ -52,6 +53,7 @@ public class MovePlayerState : PlayerState, ICharacterState
     {
         // 할당된 액션 해제
         _playerInput.actions["Jump"].performed -= Jump;
+        _playerInput.actions["Fire"].performed -= Attack;
         
         // Move 애니메이션 중단
         _animator.SetBool(PlayerController.PlayerAniParamMove, false);
