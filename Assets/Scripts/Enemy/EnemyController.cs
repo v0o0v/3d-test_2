@@ -15,6 +15,7 @@ public struct EnemyStatus {
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Rigidbody))]
 public class EnemyController : MonoBehaviour {
 
     // AI 관련
@@ -59,6 +60,8 @@ public class EnemyController : MonoBehaviour {
     //추적 대상
     private Transform _targetTransform;
     private Collider[] _detectionResults = new Collider[1];
+    
+    private Rigidbody _rigidbody;
 
     private void Awake(){
         _animator = GetComponent<Animator>();
@@ -67,6 +70,8 @@ public class EnemyController : MonoBehaviour {
         // NavMesh Agent 설정
         _navMeshAgent.updatePosition = false;
         _navMeshAgent.updateRotation = true;
+        
+        _rigidbody  = GetComponent<Rigidbody>();
 
         _states = new Dictionary<EEnemyState, ICharacterState>{
             { EEnemyState.Idle, new IdleEnemyState(this, _animator, _navMeshAgent) },
@@ -136,6 +141,13 @@ public class EnemyController : MonoBehaviour {
 
         if (enemyStatus.hp <= 0){
             SetState(EEnemyState.Dead);
+            _rigidbody.isKinematic = false;
+            _rigidbody.useGravity = true;
+            var direction = attackDirection;
+            direction.y = 1f;
+            direction = direction.normalized;
+            var force = direction * 10;
+            _rigidbody.AddForce(force, ForceMode.Impulse);
         }
         else{
             SetState(EEnemyState.Hit);
