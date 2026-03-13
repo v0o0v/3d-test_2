@@ -10,7 +10,9 @@ public class DeadEnemyState : EnemyState, ICharacterState {
         _animator.SetTrigger(EnemyController.EnemyAniParamDead);
     }
 
-    public void Update(){ }
+    public void Update(){
+        
+    }
     public void Exit(){ }
 
 }

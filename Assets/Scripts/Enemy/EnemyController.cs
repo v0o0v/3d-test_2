@@ -25,7 +25,15 @@ public class EnemyController : MonoBehaviour {
     [SerializeField] private LayerMask detectionTargetLayerMask; // 추적 대상 레이어마스크
     [SerializeField] private float detectionSightAngle = 30f; // 디텍션 시야 반각(전체 보는 각은 결국 60도로 계산해야함)
     [SerializeField] private float minimumRunDistance = 5f;
+
     [Header("Status")] [SerializeField] private EnemyStatus enemyStatus;
+    [Header("Renderer")] [SerializeField] private Renderer enemyRenderer;
+
+    // ragdoll
+    [SerializeField] private GameObject ragdollRoot;
+    private Collider[] ragdollColliders;
+    private Rigidbody[] ragdollRigidbodies;
+    private CharacterJoint[] ragdollJoints;
 
     public float PatrolDetectionDistance => patrolDetectionDistance;
     public float PatrolWaitTime => patrolWaitTime;
@@ -60,8 +68,9 @@ public class EnemyController : MonoBehaviour {
     //추적 대상
     private Transform _targetTransform;
     private Collider[] _detectionResults = new Collider[1];
-    
+
     private Rigidbody _rigidbody;
+    private Collider _collider;
 
     private void Awake(){
         _animator = GetComponent<Animator>();
@@ -70,8 +79,9 @@ public class EnemyController : MonoBehaviour {
         // NavMesh Agent 설정
         _navMeshAgent.updatePosition = false;
         _navMeshAgent.updateRotation = true;
-        
-        _rigidbody  = GetComponent<Rigidbody>();
+
+        _rigidbody = GetComponent<Rigidbody>();
+        _collider = GetComponent<Collider>();
 
         _states = new Dictionary<EEnemyState, ICharacterState>{
             { EEnemyState.Idle, new IdleEnemyState(this, _animator, _navMeshAgent) },
@@ -85,6 +95,15 @@ public class EnemyController : MonoBehaviour {
 
         _targetTransform = null;
         _hpBarController = GetComponent<HPBarController>();
+        
+        // ragdoll 요소 할당
+        ragdollColliders = ragdollRoot.transform.GetComponentsInChildren<Collider>();
+        ragdollRigidbodies = ragdollRoot.transform.GetComponentsInChildren<Rigidbody>();
+        ragdollJoints = ragdollRoot.transform.GetComponentsInChildren<CharacterJoint>();
+        
+        // ragdoll 비활성화
+        setRagdollEnable(false);
+        
     }
 
     private void Update(){
@@ -116,6 +135,7 @@ public class EnemyController : MonoBehaviour {
     }
 
     // 일정 거리 안에 Player가 있는지 확인 후 있으면 Player의 Transform 정보를 반환
+
     public Transform DetectionTargetInCircle(){
         if (!_targetTransform){
             // NonAlloc은 새로운 배열을 생성하지 않기 때문에 메모리 사용 효율적.
@@ -148,6 +168,7 @@ public class EnemyController : MonoBehaviour {
             direction = direction.normalized;
             var force = direction * 10;
             _rigidbody.AddForce(force, ForceMode.Impulse);
+            _collider.isTrigger = false;
         }
         else{
             SetState(EEnemyState.Hit);
@@ -195,6 +216,47 @@ public class EnemyController : MonoBehaviour {
             Gizmos.DrawSphere(_navMeshAgent.destination, 0.5f);
             Gizmos.DrawLine(transform.position, _navMeshAgent.destination);
         }
+    }
+
+    private void setRagdollEnable(bool isEnable){
+        foreach (Collider ragdollCollider in ragdollColliders){
+            ragdollCollider.enabled = isEnable;
+        }
+
+        foreach (Rigidbody ragdollRigidbody in ragdollRigidbodies){
+            ragdollRigidbody.isKinematic = !isEnable;
+            ragdollRigidbody.detectCollisions = isEnable;
+        }
+
+        _animator.enabled = !isEnable;
+        _collider.enabled = !isEnable;
+        _rigidbody.detectCollisions = !isEnable;
+        
+        _animator.Rebind();
+        _animator.Update(0f);
+    }
+
+    private void OnCollisionEnter(Collision other){
+        if (other.gameObject.CompareTag("Ground")){
+            setRagdollEnable(true);
+            StartCoroutine(Dissolve());
+        }
+    }
+
+    IEnumerator Dissolve(){
+        var propertyBlock = new MaterialPropertyBlock();
+        enemyRenderer.GetPropertyBlock(propertyBlock);
+
+        yield return new WaitForSeconds(3f);
+        
+        var value = 0f;
+        while (value < 1f){
+            value+=Time.deltaTime;
+            propertyBlock.SetFloat("_Cutoff", value);
+            enemyRenderer.SetPropertyBlock(propertyBlock);
+            yield return null;
+        }
+        Destroy(gameObject);
     }
 
 }
