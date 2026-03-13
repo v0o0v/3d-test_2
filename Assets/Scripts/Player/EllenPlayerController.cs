@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class EllenPlayerController : PlayerController , IWeaponObserver<GameObject>{
+public class EllenPlayerController : PlayerController, IWeaponObserver<GameObject> {
 
     [SerializeField] private Transform weaponAttachTransform;
 
@@ -22,12 +22,17 @@ public class EllenPlayerController : PlayerController , IWeaponObserver<GameObje
     }
 
     public void OnNext(GameObject value){
-        value.GetComponent<EnemyController>()?.SetHit(10, transform.forward);
+        var enemyController = value.GetComponent<EnemyController>();
+        if (enemyController){
+            enemyController.SetHit(10
+                , (enemyController.transform.position - transform.position).normalized);
+        }
     }
+
     public void OnComplete(){
         _meleeWeaponController.Unsubscribe(this);
     }
-    public void OnError(Exception error){
-    }
+
+    public void OnError(Exception error){ }
 
 }

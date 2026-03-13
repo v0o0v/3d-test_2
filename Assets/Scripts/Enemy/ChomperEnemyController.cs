@@ -11,7 +11,9 @@ public class ChomperEnemyController : EnemyController, IWeaponObserver<GameObjec
     }
 
     public void OnNext(GameObject value){
-        value.GetComponent<PlayerController>()?.SetHit(10, -transform.forward);
+        var playerController = value.GetComponent<PlayerController>();
+        var knockbackDirection = (playerController.transform.position - transform.position).normalized;
+        playerController.SetHit(10, knockbackDirection);
     }
 
     public void OnComplete(){
