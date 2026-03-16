@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static Constants;
 
 public class GameManager : Singleton<GameManager> {
 
@@ -10,6 +11,10 @@ public class GameManager : Singleton<GameManager> {
         Cursor.visible = _isCursorLock;
         Cursor.lockState = _isCursorLock ? CursorLockMode.None : CursorLockMode.Locked;
         _isCursorLock = !_isCursorLock;
+    }
+
+    public void LoadScene(ESceneType type){
+        
     }
 
     public Canvas GetCanvas(){
