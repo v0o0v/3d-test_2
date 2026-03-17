@@ -441,6 +441,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e6b83b084154ca0a792ea75133f66d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DoorHuge
+  sceneType: 1
 --- !u!4 &286737112 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4534957785794514429, guid: e253574e1d633d64fb4430a499f173bb, type: 3}

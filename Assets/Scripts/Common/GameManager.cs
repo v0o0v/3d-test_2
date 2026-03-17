@@ -27,7 +27,7 @@ public class GameManager : Singleton<GameManager> {
         //로딩 창 표시
         bool showDone = false;
         loadingPanelController.Show(() => showDone = true);
-        yield return new WaitWhile(() => showDone);
+        yield return new WaitUntil(() => showDone);
         
         // 씬 로드 진행
         AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(sceneType.ToString());
@@ -42,7 +42,7 @@ public class GameManager : Singleton<GameManager> {
         
         bool hideDone = false;
         loadingPanelController.Hide(() => hideDone = true);
-        yield return new WaitWhile(() => hideDone);
+        yield return new WaitUntil(() => hideDone);
         
         Destroy(loadingPanelObject);
     }

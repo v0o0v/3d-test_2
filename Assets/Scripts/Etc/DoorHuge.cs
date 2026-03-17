@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class DoorHuge : MonoBehaviour {
 
+    [SerializeField] Constants.ESceneType sceneType;
     private Animator _animator;
 
     private void Awake(){
@@ -10,6 +12,12 @@ public class DoorHuge : MonoBehaviour {
 
     public void Open(){
         _animator.SetTrigger("Open");
+        StartCoroutine(LoadSceneRoutine(sceneType));
+    }
+
+    private IEnumerator LoadSceneRoutine(Constants.ESceneType type){
+        yield return new WaitForSeconds(2f);
+        GameManager.Instance.LoadScene(sceneType);
     }
     
     public void Close(){
